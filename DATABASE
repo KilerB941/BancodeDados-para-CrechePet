@@ -1,0 +1,11 @@
+CREATE DATABASE creche_animais;
+
+\c creche_animais;
+
+CREATE TABLE Clientes (
+    id_cliente SERIAL PRIMARY KEY,
+    nome_cliente VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20),
+    email VARCHAR(100),
+    endereco TEXT
+);
