@@ -1,0 +1,59 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { Pool } = require('pg');
+
+const app = express();
+const port = 5000;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
+
+// Configurar o pool de conexão com PostgreSQL
+const pool = new Pool({
+  user: 'seu-usuario', // Usuário do PostgreSQL
+  host: 'localhost',
+  database: 'creche_animais',
+  password: 'sua-senha',
+  port: 5432,
+});
+
+// Testar a conexão
+pool.connect((err) => {
+  if (err) {
+    console.error('Erro ao conectar ao banco de dados:', err);
+  } else {
+    console.log('Conectado ao banco de dados PostgreSQL');
+  }
+});
+
+// Rotas simples para adicionar clientes
+app.post('/clientes', async (req, res) => {
+  const { nome_cliente, telefone, email, endereco } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO Clientes (nome_cliente, telefone, email, endereco) VALUES ($1, $2, $3, $4) RETURNING *',
+      [nome_cliente, telefone, email, endereco]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao adicionar cliente');
+  }
+});
+
+// Rota para buscar todos os clientes
+app.get('/clientes', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM Clientes');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao buscar clientes');
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Servidor rodando em http://localhost:${port}`);
+});
